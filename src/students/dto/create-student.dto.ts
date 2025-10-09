@@ -8,6 +8,7 @@ import {
   IsPositive,
   IsOptional,
 } from 'class-validator';
+import { Grade } from '../entities/grade.entity';
 export class CreateStudentDto {
    
         @IsString()
@@ -28,4 +29,10 @@ export class CreateStudentDto {
 
         @IsArray()
         subjects: string[]
+
+        @IsArray()
+        @IsOptional()
+        grades: Grade[];
+
+
 }

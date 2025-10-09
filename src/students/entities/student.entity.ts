@@ -3,8 +3,10 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Grade } from './grade.entity';
 
 @Entity()
 export class Student {
@@ -38,7 +40,8 @@ export class Student {
         array: true
     })
     subjects: string[]
-
+  @OneToMany(() => Grade, (grade) => grade.student, { cascade: true, eager: true })
+  grades?: Grade[]
   @BeforeInsert()
   checkNickcnameFirst() {
       if (!this.nickname) {
