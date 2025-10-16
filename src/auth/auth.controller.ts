@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -36,4 +37,13 @@ export class AuthController {
   // remove(@Param('id') id: string) {
   //   return this.authService.remove(+id);
   // }
+
+  @Get('private')
+  @UseGuards(AuthGuard)
+  testingPrivateRoute(){
+    return {
+      ok: true,
+      message: 'You have access to this private route'
+    }
+  }
 }

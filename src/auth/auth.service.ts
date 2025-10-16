@@ -1,10 +1,18 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
+import { Jwt } from './interfaces/jwt.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +20,8 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService
   ){}
 
   async create(createUserDto: CreateUserDto) {
@@ -34,7 +43,7 @@ export class AuthService {
     const {email, password} = loginDto;
     const user = await this.userRepository.findOne({
       where: {email},
-      select: {email: true, password: true}
+      select: {email: true, password: true,id: true}
     })
 
     if(!user) throw new NotFoundException(`User ${email} not found`)
@@ -43,11 +52,18 @@ export class AuthService {
       throw new UnauthorizedException(`Email or password incorrect`);
 
     delete user.password;
-    return user;
+    return {
+      ...user,
+      token: this.getJwtToken({id: user.id ,email: user.email})
+    };
   }
 
   encryptPassword(password){
     return bcrypt.hashSync(password, 10)
+  }
+
+  private getJwtToken(payload: Jwt){
+    return this.jwtService.sign(payload);
   }
 
   // findAll() {
