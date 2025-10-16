@@ -27,17 +27,16 @@ export class StudentsService {
   ) {}
 
   async create(createStudentDto: CreateStudentDto) {
-    try {
-
-      const {grades = [], ...studentDetails}= createStudentDto;
-
+    try{
+      const { grades = [], ...studentDetails} = createStudentDto;
       const student = this.studentRepository.create({
         ...studentDetails,
-        grades: grades.map( grade => this.gradeRepository.create(grade) )
+        grades: grades.map(grade => this.gradeRepository.create(grade))
       });
       await this.studentRepository.save(student);
-    } catch (e) {
-      this.handleExeption(e);
+      return student;
+    }catch(error){
+      this.handleExeption(error);
     }
   }
 
@@ -109,10 +108,23 @@ export class StudentsService {
     await this.studentRepository.remove(student);
   }
 
+  deleteAllStudents(){
+    const query = this.studentRepository.createQueryBuilder();
+    try{
+      return query.delete()
+        .where({})
+        .execute();
+    }catch(error){
+      this.handleExeption(error);
+    }
+  }
+
   private handleExeption(err) {
     if (err.code === 2505) {
       throw new InternalServerErrorException(err.detail);
       this.logger.error(err);
     }
   }
+
+
 }
