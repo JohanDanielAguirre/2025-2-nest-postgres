@@ -1,11 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Headers, SetMetadata } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from './decorators/get-user.decorator';
-import { User } from './entities/user.entity';
-import { UserRoleGuard } from './guards/user-role/user-role.guard';
+import { Auth } from './decorators/auth-decorator';
+import { ValidRoles } from './enums/roles.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -17,24 +15,17 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() login: LoginDto){
+  login(@Body() login: LoginDto) {
     return this.authService.login(login);
   }
 
-
   @Get('private')
-
-  @UseGuards(AuthGuard(), UserRoleGuard)
-  @SetMetadata('roles', ['admin', 'teacher'])
-  testPrivate(
-    //@GetUser() user: User
-    //@RawHeaders() headers: Headers
-
-  ){
+  @Auth(ValidRoles.USER)
+  testPrivate() {
     //console.log("🚀 ~ :29 ~ AuthController ~ testPrivate ~ user:", user)
     return {
       ok: true,
-      message: 'logged in'
-    }
+      message: 'logged in',
+    };
   }
 }

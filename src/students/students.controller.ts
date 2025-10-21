@@ -1,14 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { PaginationDto } from './dto/pagination.dto';
+import { Auth } from '../auth/decorators/auth-decorator';
+import { ValidRoles } from '../auth/enums/roles.enum';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
   @Post()
+  @Auth(ValidRoles.ADMIN)
+  @ApiResponse({status: 201, description: 'Student created successfully.'})
+  @ApiResponse({status: 403, description: 'Forbidden.'})
+  @ApiResponse({status: 400, description: 'Bad Request.'})
   create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentsService.create(createStudentDto);
   }
