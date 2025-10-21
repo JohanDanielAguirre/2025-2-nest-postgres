@@ -1,7 +1,7 @@
-import{ExecutionContext} from '@nestjs/common';
-import * as request from 'supertest';
-
-export const RawHeaders = (context: ExecutionContext) => {
-  const req = context.switchToHttp().getRequest();
-  return req.rawHeaders;
-}
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+export const RawHeaders = createParamDecorator(
+  (data, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
+    return request.rawHeaders;
+  }
+)

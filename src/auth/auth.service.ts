@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -13,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { Jwt } from './interfaces/jwt.interface';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +28,14 @@ export class AuthService {
       });
       await this.userRepository.save(user);
       delete user.password;
-      return user;
+
+      return {
+        ...user,
+        token: this.getJwtToken(
+          {id: user.id,
+            email: user.email
+          })
+      };
     }catch(error){
       this.handleException(error);
     }
@@ -43,7 +45,7 @@ export class AuthService {
     const {email, password} = loginDto;
     const user = await this.userRepository.findOne({
       where: {email},
-      select: {email: true, password: true,id: true}
+      select: {email: true, password: true, id:true}
     })
 
     if(!user) throw new NotFoundException(`User ${email} not found`)
@@ -54,7 +56,10 @@ export class AuthService {
     delete user.password;
     return {
       ...user,
-      token: this.getJwtToken({id: user.id ,email: user.email})
+      token: this.getJwtToken(
+        {id: user.id,
+          email: user.email
+        })
     };
   }
 
@@ -63,24 +68,10 @@ export class AuthService {
   }
 
   private getJwtToken(payload: Jwt){
-    return this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 
-  // findAll() {
-  //   return `This action returns all auth`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} auth`;
-  // }
-
-  // update(id: number, updateAuthDto: UpdateAuthDto) {
-  //   return `This action updates a #${id} auth`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} auth`;
-  // }
   private handleException(error){
     this.logger.error(error);
     if(error.code === '23505')

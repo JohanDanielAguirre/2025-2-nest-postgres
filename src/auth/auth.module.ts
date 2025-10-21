@@ -25,6 +25,6 @@ import { JwtStrategy } from './strategies/jwt.estrategy';
       }
     })],
   providers: [AuthService, JwtStrategy, ConfigService],
-  exports: [TypeOrmModule, PassportModule, JwtModule]
+  exports: [TypeOrmModule, PassportModule, JwtModule, JwtStrategy]
 })
 export class AuthModule {}
